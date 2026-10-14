@@ -1,4 +1,4 @@
-# MediPulse Specialist Clinic & Diagnostic Centre — Hospital Management System (HMS)
+# CAPSTONE CLINIC SYSTEM
 
 Enterprise-grade, secure, staff-only Clinic Information & Management System designed for hospital outpatient and specialist clinical workflows.
 

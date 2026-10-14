@@ -447,7 +447,7 @@ function seedInitialData() {
   const settingsCount = db.prepare('SELECT COUNT(*) as c FROM clinic_settings').get() as { c: number };
   if (settingsCount.c === 0) {
     const defaultSettings: [string, string][] = [
-      ['clinic_name', 'MediPulse Specialist Clinic & Diagnostic Centre'],
+      ['clinic_name', 'CAPSTONE CLINIC SYSTEM'],
       ['clinic_phone', '+234 803 123 4567'],
       ['clinic_email', 'ops@medipulseclinic.ng'],
       ['clinic_address', '14 Victoria Island Boulevard, Lagos, Nigeria'],
@@ -462,6 +462,8 @@ function seedInitialData() {
     for (const [k, v] of defaultSettings) {
       ins.run(k, v, now);
     }
+  } else {
+    db.prepare("UPDATE clinic_settings SET value = 'CAPSTONE CLINIC SYSTEM' WHERE key = 'clinic_name'").run();
   }
 
   // 2. Initial Staff Users (Real credentials hashed with bcrypt)

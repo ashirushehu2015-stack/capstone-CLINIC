@@ -61,7 +61,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <div className="w-12 h-12 bg-teal-500 rounded-xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-3 shadow-md">
             ✚
           </div>
-          <h1 className="text-xl font-bold tracking-tight">MediPulse Clinic HMS</h1>
+          <h1 className="text-xl font-bold tracking-tight">CAPSTONE CLINIC SYSTEM</h1>
           <p className="text-xs text-slate-400 mt-1">Staff-Only Clinical Information System</p>
           <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 text-[11px] text-teal-300 border border-slate-700">
             <ShieldCheck className="w-3.5 h-3.5" />

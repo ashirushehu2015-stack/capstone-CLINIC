@@ -50,7 +50,7 @@ export const PrintDocumentModal: React.FC<PrintDocumentModalProps> = ({
           <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
             <div>
               <h1 className="text-lg font-black tracking-tight text-slate-950 uppercase">
-                MediPulse Specialist Clinic & Diagnostic Centre
+                CAPSTONE CLINIC SYSTEM
               </h1>
               <p className="text-[11px] text-slate-600">
                 14 Victoria Island Boulevard, Lagos, Nigeria · Tel: +234 803 123 4567

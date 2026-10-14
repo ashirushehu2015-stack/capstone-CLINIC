@@ -84,7 +84,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`MediPulse Staff Clinic Management System active on http://0.0.0.0:${PORT}`);
+    console.log(`CAPSTONE CLINIC SYSTEM active on http://0.0.0.0:${PORT}`);
   });
 }
 

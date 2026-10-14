@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onSwitchUser }) 
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-semibold text-slate-900 tracking-tight">MediPulse Clinic</span>
+              <span className="text-base font-bold text-slate-900 tracking-tight">CAPSTONE CLINIC SYSTEM</span>
               <span className="text-xs px-2 py-0.5 rounded border font-medium text-slate-600 bg-slate-50 border-slate-200">
                 Staff Only
               </span>
