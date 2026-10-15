@@ -7,24 +7,40 @@ import { logAuditEvent } from '../audit.js';
 const router = Router();
 
 // Get Service Catalog
+// Get Service Catalog
 router.get('/services', requireAuth, (req: AuthRequest, res: Response) => {
-  const services = db.prepare('SELECT * FROM service_catalog WHERE is_active = 1 ORDER BY category ASC, name ASC').all();
+  const activeOnly = req.query.active_only === 'true';
+  const sql = activeOnly
+    ? 'SELECT * FROM service_catalog WHERE is_active = 1 ORDER BY category ASC, name ASC'
+    : 'SELECT * FROM service_catalog ORDER BY category ASC, name ASC';
+  const services = db.prepare(sql).all();
   res.json({ services });
 });
 
 // Add/Update Service in Catalog (Admin, Accountant)
 router.post('/services', requireAuth, requireRoles('accountant', 'admin'), (req: AuthRequest, res: Response) => {
-  const { code, name, category, price, description } = req.body;
+  const { code, name, category, price, description, is_active } = req.body;
 
   if (!code || !name || !category || price === undefined) {
     res.status(400).json({ error: 'Code, name, category, and price are required.' });
     return;
   }
 
+  const activeVal = is_active !== undefined ? (is_active ? 1 : 0) : 1;
   const existing = db.prepare('SELECT id FROM service_catalog WHERE LOWER(code) = LOWER(?)').get(code) as any;
   if (existing) {
-    db.prepare('UPDATE service_catalog SET name = ?, category = ?, price = ?, description = ? WHERE id = ?')
-      .run(name, category, parseFloat(price), description || null, existing.id);
+    db.prepare('UPDATE service_catalog SET name = ?, category = ?, price = ?, description = ?, is_active = ? WHERE id = ?')
+      .run(name, category, parseFloat(price), description || null, activeVal, existing.id);
+    logAuditEvent({
+      userId: req.user!.id,
+      userRole: req.user!.role,
+      action: 'UPDATE_SERVICE',
+      entityType: 'service_catalog',
+      entityId: existing.id,
+      outcome: 'SUCCESS',
+      details: { code, name, price, is_active: activeVal },
+      ipAddress: req.ip
+    });
     res.json({ message: 'Service updated.' });
     return;
   }
@@ -32,10 +48,47 @@ router.post('/services', requireAuth, requireRoles('accountant', 'admin'), (req:
   const id = `srv_${crypto.randomUUID().slice(0, 8)}`;
   db.prepare(`
     INSERT INTO service_catalog (id, code, name, category, price, description, is_active)
-    VALUES (?, ?, ?, ?, ?, ?, 1)
-  `).run(id, code.toUpperCase(), name, category, parseFloat(price), description || null);
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(id, code.toUpperCase(), name, category, parseFloat(price), description || null, activeVal);
+
+  logAuditEvent({
+    userId: req.user!.id,
+    userRole: req.user!.role,
+    action: 'CREATE_SERVICE',
+    entityType: 'service_catalog',
+    entityId: id,
+    outcome: 'SUCCESS',
+    details: { code: code.toUpperCase(), name, price, is_active: activeVal },
+    ipAddress: req.ip
+  });
 
   res.status(201).json({ message: 'Service created.', id });
+});
+
+// Toggle Service Active Status
+router.patch('/services/:id/toggle', requireAuth, requireRoles('accountant', 'admin'), (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const srv = db.prepare('SELECT * FROM service_catalog WHERE id = ?').get(id) as any;
+  if (!srv) {
+    res.status(404).json({ error: 'Service not found.' });
+    return;
+  }
+
+  const newStatus = srv.is_active === 1 ? 0 : 1;
+  db.prepare('UPDATE service_catalog SET is_active = ? WHERE id = ?').run(newStatus, id);
+
+  logAuditEvent({
+    userId: req.user!.id,
+    userRole: req.user!.role,
+    action: 'TOGGLE_SERVICE_STATUS',
+    entityType: 'service_catalog',
+    entityId: id,
+    outcome: 'SUCCESS',
+    details: { code: srv.code, name: srv.name, is_active: newStatus },
+    ipAddress: req.ip
+  });
+
+  res.json({ message: `Service ${newStatus === 1 ? 'activated' : 'deactivated'}.`, is_active: newStatus });
 });
 
 // List Invoices

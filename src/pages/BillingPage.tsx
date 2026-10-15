@@ -13,7 +13,15 @@ import {
   BarChart,
   Search,
   Plus,
-  X
+  X,
+  Layers,
+  ShieldCheck,
+  Activity,
+  Check,
+  ToggleLeft,
+  ToggleRight,
+  Filter,
+  Tag
 } from 'lucide-react';
 
 interface BillingPageProps {
@@ -21,11 +29,25 @@ interface BillingPageProps {
 }
 
 export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'reconciliation'>('invoices');
+  const [activeTab, setActiveTab] = useState<'invoices' | 'reconciliation' | 'services'>('invoices');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [reconciliation, setReconciliation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Service Catalog state
+  const [servicesList, setServicesList] = useState<any[]>([]);
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState('all');
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [showAddServiceModal, setShowAddServiceModal] = useState(false);
+  const [newService, setNewService] = useState({
+    code: '',
+    name: '',
+    category: 'consultation',
+    price: '',
+    description: '',
+    is_active: true
+  });
 
   // Payment Modal
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -56,10 +78,39 @@ export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
 
       const vRes = await apiRequest('/api/visits');
       setOpenVisits(vRes.visits || []);
+
+      const srvRes = await apiRequest('/api/billing/services');
+      setServicesList(srvRes.services || []);
     } catch (err) {
       console.error('Failed to load billing data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleService = async (serviceId: string) => {
+    try {
+      const res = await apiRequest(`/api/billing/services/${serviceId}/toggle`, { method: 'PATCH' });
+      setMessage({ type: 'success', text: res.message });
+      fetchData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to toggle service status');
+    }
+  };
+
+  const handleCreateService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await apiRequest('/api/billing/services', {
+        method: 'POST',
+        body: JSON.stringify(newService)
+      });
+      setMessage({ type: 'success', text: res.message });
+      setShowAddServiceModal(false);
+      setNewService({ code: '', name: '', category: 'consultation', price: '', description: '', is_active: true });
+      fetchData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to create service');
     }
   };
 
@@ -158,18 +209,37 @@ export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
             >
               Daily Shift Reconciliation
             </button>
+            <button
+              onClick={() => setActiveTab('services')}
+              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 ${
+                activeTab === 'services' ? 'bg-white text-teal-800 shadow-2xs' : 'text-slate-600'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-teal-600" />
+              <span>Registered Services ({servicesList.filter(s => s.is_active === 1).length} Active)</span>
+            </button>
           </div>
 
-          <button
-            onClick={() => {
-              setAutoGenVisitId(openVisits[0]?.id || '');
-              setShowAutoGenModal(true);
-            }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-xs"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Generate Visit Invoice</span>
-          </button>
+          {activeTab === 'services' && (user.role === 'admin' || user.role === 'accountant') ? (
+            <button
+              onClick={() => setShowAddServiceModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-xs"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Register New Service</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setAutoGenVisitId(openVisits[0]?.id || '');
+                setShowAutoGenModal(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Generate Visit Invoice</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -324,7 +394,7 @@ export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
             )}
           </div>
         </>
-      ) : (
+      ) : activeTab === 'reconciliation' ? (
         /* Daily Shift Reconciliation */
         reconciliation && (
           <div className="space-y-6">
@@ -388,6 +458,250 @@ export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
             </div>
           </div>
         )
+      ) : (
+        /* Registered Services & Tariffs Catalog */
+        <div className="space-y-6">
+          {/* Active Status System Banner */}
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-xl p-5 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center shrink-0 border border-white/20">
+                <ShieldCheck className="w-6 h-6 text-emerald-100" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold tracking-tight text-white">
+                    All Registered Services are Active on the System
+                  </h2>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-400/25 text-emerald-100 border border-emerald-300/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                    100% Operational
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-50/90 mt-1 max-w-2xl leading-relaxed">
+                  Every registered clinical, maternity, laboratory, ultrasound imaging, inpatient ward, and consultation service in AL-EMAN CLINIC AND MATERNITY HOME is live and available for doctor ordering, clinical documentation, and automated cashier billing.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 flex items-center gap-3">
+              <div className="px-3.5 py-2 rounded-lg bg-white/10 backdrop-blur-xs border border-white/15 text-center">
+                <span className="block text-[10px] font-semibold uppercase tracking-wider text-emerald-100">Live Services</span>
+                <span className="text-xl font-bold font-mono text-white">
+                  {servicesList.filter(s => s.is_active === 1).length} / {servicesList.length}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stat metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-500 mb-1">
+                <span className="text-xs font-semibold uppercase">Total Catalog</span>
+                <Layers className="w-4 h-4 text-teal-600" />
+              </div>
+              <div className="text-2xl font-bold font-mono text-slate-900">{servicesList.length}</div>
+              <span className="text-[11px] text-slate-500">Registered hospital services</span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-500 mb-1">
+                <span className="text-xs font-semibold uppercase">Active Status</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="text-2xl font-bold font-mono text-emerald-700">
+                {servicesList.filter(s => s.is_active === 1).length} Active
+              </div>
+              <span className="text-[11px] text-emerald-600 font-medium">100% live & orderable</span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-500 mb-1">
+                <span className="text-xs font-semibold uppercase">Departments</span>
+                <Activity className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold font-mono text-slate-900">
+                {new Set(servicesList.map(s => s.category)).size}
+              </div>
+              <span className="text-[11px] text-slate-500">Maternity, Lab, Scans & Care</span>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+              <div className="flex items-center justify-between text-slate-500 mb-1">
+                <span className="text-xs font-semibold uppercase">Billing Currency</span>
+                <Tag className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-bold font-mono text-slate-900">NGN (₦)</div>
+              <span className="text-[11px] text-slate-500">Regulated clinic tariffs</span>
+            </div>
+          </div>
+
+          {/* Filters & Search */}
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold text-slate-600 mr-1 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5" /> Department:
+              </span>
+              {[
+                { id: 'all', label: 'All Services' },
+                { id: 'maternity', label: 'Maternity & Delivery' },
+                { id: 'imaging', label: 'Ultrasound / Scans' },
+                { id: 'consultation', label: 'Consultations' },
+                { id: 'laboratory', label: 'Laboratory' },
+                { id: 'nursing', label: 'Nursing & Child' },
+                { id: 'procedure', label: 'Procedures' },
+                { id: 'inpatient', label: 'Inpatient Ward' }
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setServiceCategoryFilter(cat.id)}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors ${
+                    serviceCategoryFilter === cat.id
+                      ? 'bg-teal-600 text-white'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative min-w-[240px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={serviceSearch}
+                onChange={(e) => setServiceSearch(e.target.value)}
+                placeholder="Search service name, code, or details..."
+                className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-md text-xs focus:ring-1 focus:ring-teal-500 focus:outline-hidden"
+              />
+            </div>
+          </div>
+
+          {/* Services Table */}
+          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Institutional Service & Tariff Directory</h3>
+                <p className="text-xs text-slate-500">Official fee schedule for Al-Eman Clinic and Maternity Home</p>
+              </div>
+              <span className="text-xs font-semibold text-slate-600">
+                Showing {servicesList.filter((s) => {
+                  const matchesCat = serviceCategoryFilter === 'all' || s.category === serviceCategoryFilter;
+                  const matchesSearch =
+                    !serviceSearch ||
+                    s.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+                    s.code.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+                    (s.description && s.description.toLowerCase().includes(serviceSearch.toLowerCase()));
+                  return matchesCat && matchesSearch;
+                }).length} of {servicesList.length} services
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+                  <tr>
+                    <th className="p-3 w-32">Service Code</th>
+                    <th className="p-3">Service Name & Description</th>
+                    <th className="p-3 w-36">Department</th>
+                    <th className="p-3 w-32 text-right">Standard Tariff</th>
+                    <th className="p-3 w-28 text-center">System Status</th>
+                    {(user.role === 'admin' || user.role === 'accountant') && (
+                      <th className="p-3 w-28 text-center">Action</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {servicesList
+                    .filter((s) => {
+                      const matchesCat = serviceCategoryFilter === 'all' || s.category === serviceCategoryFilter;
+                      const matchesSearch =
+                        !serviceSearch ||
+                        s.name.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+                        s.code.toLowerCase().includes(serviceSearch.toLowerCase()) ||
+                        (s.description && s.description.toLowerCase().includes(serviceSearch.toLowerCase()));
+                      return matchesCat && matchesSearch;
+                    })
+                    .map((s) => {
+                      const getCatStyle = (cat: string) => {
+                        switch (cat) {
+                          case 'maternity':
+                            return 'bg-pink-50 text-pink-700 border-pink-200';
+                          case 'imaging':
+                            return 'bg-purple-50 text-purple-700 border-purple-200';
+                          case 'laboratory':
+                            return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+                          case 'consultation':
+                            return 'bg-blue-50 text-blue-700 border-blue-200';
+                          case 'nursing':
+                            return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                          case 'procedure':
+                            return 'bg-amber-50 text-amber-700 border-amber-200';
+                          case 'inpatient':
+                            return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                          default:
+                            return 'bg-slate-100 text-slate-700 border-slate-200';
+                        }
+                      };
+
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="p-3">
+                            <span className="font-mono font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+                              {s.code}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <div className="font-semibold text-slate-900">{s.name}</div>
+                            {s.description && (
+                              <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">{s.description}</div>
+                            )}
+                          </td>
+                          <td className="p-3">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase border ${getCatStyle(s.category)}`}>
+                              {s.category}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right">
+                            <span className="font-mono font-bold text-slate-900 text-sm">
+                              {formatNGN(s.price)}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">
+                            {s.is_active === 1 ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                Active
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                Inactive
+                              </span>
+                            )}
+                          </td>
+                          {(user.role === 'admin' || user.role === 'accountant') && (
+                            <td className="p-3 text-center">
+                              <button
+                                onClick={() => handleToggleService(s.id)}
+                                title={s.is_active === 1 ? 'Deactivate service' : 'Activate service'}
+                                className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition-colors ${
+                                  s.is_active === 1
+                                    ? 'bg-slate-50 text-slate-600 border-slate-300 hover:bg-red-50 hover:text-red-700 hover:border-red-200'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                                }`}
+                              >
+                                {s.is_active === 1 ? 'Deactivate' : 'Activate'}
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Collect Payment Modal */}
@@ -537,6 +851,117 @@ export const BillingPage: React.FC<BillingPageProps> = ({ user }) => {
                   className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded"
                 >
                   Generate Invoice
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Register New Service Modal */}
+      {showAddServiceModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-6 text-xs">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+              <h3 className="text-sm font-bold text-slate-900">Register New Clinic Service</h3>
+              <button onClick={() => setShowAddServiceModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateService} className="mt-4 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Service Code *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. MAT-SCAN-01"
+                    value={newService.code}
+                    onChange={(e) => setNewService({ ...newService, code: e.target.value })}
+                    className="w-full p-2 border border-slate-300 rounded font-mono uppercase text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Department / Category *</label>
+                  <select
+                    value={newService.category}
+                    onChange={(e) => setNewService({ ...newService, category: e.target.value })}
+                    className="w-full p-2 border border-slate-300 rounded bg-white text-xs"
+                  >
+                    <option value="consultation">Consultation</option>
+                    <option value="maternity">Maternity & Delivery</option>
+                    <option value="imaging">Ultrasound & Imaging</option>
+                    <option value="laboratory">Laboratory</option>
+                    <option value="nursing">Nursing & Child Care</option>
+                    <option value="procedure">Clinical Procedure</option>
+                    <option value="inpatient">Inpatient Ward</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Service Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Pelvic & Fetal Growth Doppler Scan"
+                  value={newService.name}
+                  onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+                  className="w-full p-2 border border-slate-300 rounded text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Standard Tariff Fee (₦) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  placeholder="e.g. 5000"
+                  value={newService.price}
+                  onChange={(e) => setNewService({ ...newService, price: e.target.value })}
+                  className="w-full p-2 border border-slate-300 rounded font-mono text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Clinical Description / Notes</label>
+                <textarea
+                  rows={2}
+                  placeholder="Clinical indications, standard protocols, or department details..."
+                  value={newService.description}
+                  onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+                  className="w-full p-2 border border-slate-300 rounded text-xs resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 border border-slate-200 rounded">
+                <input
+                  type="checkbox"
+                  id="srv_active_chk"
+                  checked={newService.is_active}
+                  onChange={(e) => setNewService({ ...newService, is_active: e.target.checked })}
+                  className="accent-teal-600 rounded"
+                />
+                <label htmlFor="srv_active_chk" className="font-semibold text-slate-700 text-xs cursor-pointer">
+                  Activate immediately upon registration (Status: Active)
+                </label>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddServiceModal(false)}
+                  className="px-3 py-1.5 border rounded text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded text-xs"
+                >
+                  Save & Register Service
                 </button>
               </div>
             </form>

@@ -165,6 +165,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser }) => {
                   type="text"
                   value={settings.clinic_phone || ''}
                   onChange={(e) => setSettings({ ...settings, clinic_phone: e.target.value })}
+                  placeholder="08069452164, 07066694834"
                   className="w-full p-2 border rounded border-slate-300"
                 />
               </div>

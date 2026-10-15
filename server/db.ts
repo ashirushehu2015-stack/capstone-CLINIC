@@ -448,7 +448,7 @@ function seedInitialData() {
   if (settingsCount.c === 0) {
     const defaultSettings: [string, string][] = [
       ['clinic_name', 'AL-EMAN CLINIC AND MATERNITY HOME'],
-      ['clinic_phone', '+234 803 123 4567'],
+      ['clinic_phone', '08069452164, 07066694834'],
       ['clinic_email', 'info@alemanclinic.ng'],
       ['clinic_address', 'NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE'],
       ['currency_code', 'NGN'],
@@ -465,6 +465,7 @@ function seedInitialData() {
   } else {
     db.prepare("UPDATE clinic_settings SET value = 'AL-EMAN CLINIC AND MATERNITY HOME' WHERE key = 'clinic_name'").run();
     db.prepare("UPDATE clinic_settings SET value = 'NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE' WHERE key = 'clinic_address'").run();
+    db.prepare("UPDATE clinic_settings SET value = '08069452164, 07066694834' WHERE key = 'clinic_phone'").run();
   }
 
   // 2. Initial Staff Users (Real credentials hashed with bcrypt)
@@ -567,29 +568,41 @@ function seedInitialData() {
     }
   }
 
-  // 3. Service Catalog
-  const scCount = db.prepare('SELECT COUNT(*) as c FROM service_catalog').get() as { c: number };
-  if (scCount.c === 0) {
-    const services = [
-      ['srv_01', 'CONS-GP', 'General Medical Consultation', 'consultation', 7500.00, 'Standard initial or routine GP consultation'],
-      ['srv_02', 'CONS-SPEC', 'Specialist Physician Review', 'consultation', 15000.00, 'Review by Internal Medicine Consultant'],
-      ['srv_03', 'TRIAGE-STD', 'Comprehensive Nursing Triage & Vitals', 'nursing', 2000.00, 'Full vital signs, oxygenation, and BMI assessment'],
-      ['srv_04', 'INJ-ADMIN', 'Intramuscular / IV Injection Administration', 'nursing', 3000.00, 'Professional medication administration with aseptic technique'],
-      ['srv_05', 'WOUND-DRS', 'Aseptic Wound Dressing (Minor/Intermediate)', 'procedure', 6500.00, 'Cleaning, antiseptic lavage, and sterile bandaging'],
-      ['srv_06', 'LAB-FBC', 'Full Blood Count (FBC) with 5-Part Diff', 'laboratory', 6000.00, 'Complete automated hematological panel'],
-      ['srv_07', 'LAB-MP', 'Malaria Parasite Microscopic Examination', 'laboratory', 3500.00, 'Thick and thin blood film Giemsa stain'],
-      ['srv_08', 'LAB-WIDAL', 'Widal Agglutination Reaction', 'laboratory', 3500.00, 'Typhoid screening panel'],
-      ['srv_09', 'LAB-FBS', 'Fasting Blood Glucose / Random Glucose', 'laboratory', 2500.00, 'Point of care and photometric enzymatic glucose'],
-      ['srv_10', 'LAB-LIPID', 'Comprehensive Lipid Profile', 'laboratory', 12000.00, 'Cholesterol, Triglycerides, HDL, LDL, VLDL'],
-      ['srv_11', 'LAB-EUC', 'Electrolytes, Urea & Creatinine (E/U/Cr)', 'laboratory', 14000.00, 'Renal function biochemical panel'],
-      ['srv_12', 'LAB-URINE', 'Urinalysis (10-Parameter Strip & Microscopy)', 'laboratory', 3000.00, 'Urine dipstick with sediment microscopic evaluation']
-    ];
+  // 3. Service Catalog (Comprehensive Medical, Maternity, Diagnostic & Inpatient Services)
+  const comprehensiveServices = [
+    ['srv_01', 'CONS-GP', 'General Medical Consultation', 'consultation', 7500.00, 'Standard initial or routine GP consultation'],
+    ['srv_02', 'CONS-SPEC', 'Specialist Physician Review', 'consultation', 15000.00, 'Review by Internal Medicine Consultant'],
+    ['srv_13', 'CONS-ANC', 'Antenatal Care (ANC) Booking & Examination', 'maternity', 4000.00, 'Maternal health evaluation, routine gestational checkup, and birth preparedness'],
+    ['srv_14', 'MAT-DELIV', 'Normal Spontaneous Vaginal Delivery (SVD)', 'maternity', 35000.00, 'Skilled intrapartum labor care, delivery by midwife/obstetrician, and immediate postpartum care'],
+    ['srv_15', 'MAT-PNC', 'Postnatal Clinic & Neonatal Assessment', 'maternity', 3500.00, 'Postpartum maternal checkup, infant growth, and breastfeeding evaluation'],
+    ['srv_16', 'SCAN-OBS', 'Obstetric Ultrasound Scan (Fetal Viability & Growth)', 'imaging', 6000.00, 'High-resolution obstetric sonography, gestational dating, and placenta evaluation'],
+    ['srv_17', 'SCAN-ABD', 'Abdominopelvic Diagnostic Ultrasound Scan', 'imaging', 7500.00, 'Ultrasound imaging of abdominal organs and pelvic anatomy'],
+    ['srv_03', 'TRIAGE-STD', 'Comprehensive Nursing Triage & Vitals', 'nursing', 2000.00, 'Full vital signs, oxygenation, and BMI assessment'],
+    ['srv_04', 'INJ-ADMIN', 'Intramuscular / IV Injection Administration', 'nursing', 3000.00, 'Professional medication administration with aseptic technique'],
+    ['srv_19', 'IMM-CHLD', 'Child Routine Immunization & Vaccine Administration', 'nursing', 1500.00, 'National immunization schedule vaccines, cold-chain maintenance, and child health tracking'],
+    ['srv_05', 'WOUND-DRS', 'Aseptic Wound Dressing (Minor/Intermediate)', 'procedure', 6500.00, 'Cleaning, antiseptic lavage, and sterile bandaging'],
+    ['srv_18', 'WARD-ADM', 'Inpatient Ward Bed & Nursing Care (Per 24h)', 'inpatient', 5000.00, 'General observation bed, vital signs monitoring, and dedicated nursing care'],
+    ['srv_06', 'LAB-FBC', 'Full Blood Count (FBC) with 5-Part Diff', 'laboratory', 6000.00, 'Complete automated hematological panel'],
+    ['srv_07', 'LAB-MP', 'Malaria Parasite Microscopic Examination', 'laboratory', 3500.00, 'Thick and thin blood film Giemsa stain'],
+    ['srv_08', 'LAB-WIDAL', 'Widal Agglutination Reaction', 'laboratory', 3500.00, 'Typhoid screening panel'],
+    ['srv_09', 'LAB-FBS', 'Fasting Blood Glucose / Random Glucose', 'laboratory', 2500.00, 'Point of care and photometric enzymatic glucose'],
+    ['srv_10', 'LAB-LIPID', 'Comprehensive Lipid Profile', 'laboratory', 12000.00, 'Cholesterol, Triglycerides, HDL, LDL, VLDL'],
+    ['srv_11', 'LAB-EUC', 'Electrolytes, Urea & Creatinine (E/U/Cr)', 'laboratory', 14000.00, 'Renal function biochemical panel'],
+    ['srv_12', 'LAB-URINE', 'Urinalysis (10-Parameter Strip & Microscopy)', 'laboratory', 3000.00, 'Urine dipstick with sediment microscopic evaluation']
+  ];
 
-    const insSrv = db.prepare('INSERT INTO service_catalog (id, code, name, category, price, description, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)');
-    for (const s of services) {
+  const checkSrv = db.prepare('SELECT id FROM service_catalog WHERE code = ?');
+  const insSrv = db.prepare('INSERT INTO service_catalog (id, code, name, category, price, description, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)');
+
+  for (const s of comprehensiveServices) {
+    const existing = checkSrv.get(s[1]);
+    if (!existing) {
       insSrv.run(...s);
     }
   }
+
+  // Ensure all registered services in catalog are verified active (is_active = 1)
+  db.exec('UPDATE service_catalog SET is_active = 1 WHERE is_active IS NULL OR is_active = 0;');
 
   // 4. Pharmacy Formulary & Medicines Inventory
   const medCount = db.prepare('SELECT COUNT(*) as c FROM medicines').get() as { c: number };

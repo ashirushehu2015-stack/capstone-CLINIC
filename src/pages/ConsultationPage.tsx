@@ -135,8 +135,8 @@ export const ConsultationPage: React.FC<ConsultationPageProps> = ({
       const medRes = await apiRequest('/api/pharmacy/inventory');
       setMedicines(medRes.medicines || []);
 
-      const srvRes = await apiRequest('/api/billing/services');
-      setServices(srvRes.services?.filter((s: any) => s.category === 'laboratory') || []);
+      const srvRes = await apiRequest('/api/billing/services?active_only=true');
+      setServices(srvRes.services?.filter((s: any) => s.category === 'laboratory' || s.category === 'imaging' || s.category === 'procedure') || []);
     } catch (err) {
       console.error('Failed to load visit encounter:', err);
     } finally {

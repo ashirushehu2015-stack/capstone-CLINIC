@@ -130,8 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, role 
         })}
       </div>
 
-      {/* Security Status Box */}
-      <div className="pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-1 px-3">
+      {/* Security Status Box & Copyright */}
+      <div className="pt-3 border-t border-slate-800 text-[11px] text-slate-400 space-y-1.5 px-3">
         <div className="flex items-center justify-between text-slate-300 font-medium">
           <span>Security & Audit</span>
           <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800/60">
@@ -141,6 +141,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, role 
         <p className="text-[10px] leading-relaxed text-slate-400">
           Strict server-side RBAC, tamper-evident audit logs, and encrypted session security.
         </p>
+        <div className="pt-2 border-t border-slate-800/70 text-[10px] text-slate-400 space-y-0.5 text-center">
+          <div className="font-medium text-slate-300">Copyright @ MIT Capstone Project</div>
+          <div className="text-[9px] text-slate-400">Tel: 08069452164 · 07066694834</div>
+        </div>
       </div>
     </aside>
   );

@@ -58,7 +58,7 @@ export const PrintDocumentModal: React.FC<PrintDocumentModalProps> = ({
                   AL-EMAN CLINIC AND MATERNITY HOME
                 </h1>
                 <p className="text-[11px] text-slate-600">
-                  NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE · Tel: +234 803 123 4567
+                  NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE · Tel: 08069452164, 07066694834
                 </p>
                 <p className="text-[11px] text-slate-500">
                   FMOH / State Ministry of Health Licensed Private Clinic &amp; Maternity Home
@@ -324,6 +324,11 @@ export const PrintDocumentModal: React.FC<PrintDocumentModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Document Base Notice */}
+          <div className="mt-8 pt-3 border-t border-slate-200 text-center text-[10px] text-slate-400">
+            AL-EMAN CLINIC AND MATERNITY HOME · Copyright @ MIT Capstone Project · No. 19 Gulma Road, Argungu, Kebbi State · Tel: 08069452164, 07066694834
+          </div>
 
         </div>
       </div>
