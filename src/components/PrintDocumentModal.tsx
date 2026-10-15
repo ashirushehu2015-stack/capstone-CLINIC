@@ -1,6 +1,7 @@
 import React from 'react';
 import { Printer, Download, X } from 'lucide-react';
 import { formatNGN, formatDate, formatDateTime } from '../lib/api';
+import { ClinicLogo } from './ClinicLogo';
 
 interface PrintDocumentModalProps {
   title: string;
@@ -47,19 +48,24 @@ export const PrintDocumentModal: React.FC<PrintDocumentModalProps> = ({
         <div className="p-8 overflow-y-auto print:p-0 text-slate-800 text-xs font-sans print:text-black">
           
           {/* Clinic Official Letterhead */}
-          <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
-            <div>
-              <h1 className="text-lg font-black tracking-tight text-slate-950 uppercase">
-                CAPSTONE CLINIC SYSTEM
-              </h1>
-              <p className="text-[11px] text-slate-600">
-                14 Victoria Island Boulevard, Lagos, Nigeria · Tel: +234 803 123 4567
-              </p>
-              <p className="text-[11px] text-slate-500">
-                FMOH / HEFAMAA Licensed Private Medical Facility
-              </p>
+          <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-14 h-14 shrink-0">
+                <ClinicLogo variant="icon-only" className="w-14 h-14" />
+              </div>
+              <div>
+                <h1 className="text-lg font-black tracking-tight text-slate-950 uppercase">
+                  AL-EMAN CLINIC AND MATERNITY HOME
+                </h1>
+                <p className="text-[11px] text-slate-600">
+                  NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE · Tel: +234 803 123 4567
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  FMOH / State Ministry of Health Licensed Private Clinic &amp; Maternity Home
+                </p>
+              </div>
             </div>
-            <div className="text-right">
+            <div className="text-right shrink-0">
               <span className="text-xs font-mono font-semibold text-slate-600 uppercase border border-slate-300 px-2 py-0.5 rounded">
                 Official Staff Record
               </span>

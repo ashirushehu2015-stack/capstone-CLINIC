@@ -179,4 +179,100 @@ router.patch('/:id/role', requireAuth, requireRoles('admin'), (req: AuthRequest,
   res.json({ message: 'Staff role and department updated.' });
 });
 
+// Dedicated Security Audit Log Endpoint for Administrative Review
+router.get('/audit-logs', requireAuth, requireRoles('admin', 'manager'), (req: AuthRequest, res: Response) => {
+  const category = (req.query.category as string || 'all').toLowerCase();
+  const outcome = req.query.outcome as string;
+  const userId = req.query.userId as string;
+  const search = (req.query.search as string || '').trim();
+  const page = Math.max(1, parseInt(req.query.page as string || '1', 10));
+  const limit = Math.min(500, Math.max(1, parseInt(req.query.limit as string || '50', 10)));
+  const offset = (page - 1) * limit;
+
+  let sqlWhere = ' WHERE 1=1';
+  const params: any[] = [];
+
+  if (category && category !== 'all') {
+    if (category === 'auth' || category === 'login' || category === 'logins') {
+      sqlWhere += ' AND (a.action LIKE "AUTH_%" OR a.action LIKE "%LOGIN%" OR a.action LIKE "%LOGOUT%")';
+    } else if (category === 'passwords' || category === 'password') {
+      sqlWhere += ' AND (a.action LIKE "%PASSWORD%" OR a.action LIKE "%CREDENTIAL%")';
+    } else if (category === 'modifications' || category === 'data_modifications') {
+      sqlWhere += ' AND (a.action LIKE "%UPDATED%" OR a.action LIKE "%MODIFIED%" OR a.action LIKE "%AMENDED%" OR a.action LIKE "%MERGED%" OR a.action LIKE "%ADJUSTMENT%" OR a.action LIKE "%REFUND%" OR a.action LIKE "CLINIC_%")';
+    } else if (category === 'staff') {
+      sqlWhere += ' AND (a.action LIKE "STAFF_%" OR a.entity_type = "staff_user")';
+    } else if (category === 'patients') {
+      sqlWhere += ' AND (a.action LIKE "PATIENT_%" OR a.entity_type = "patient")';
+    } else if (category === 'clinical') {
+      sqlWhere += ' AND (a.action LIKE "CONSULTATION_%" OR a.action LIKE "CLINICAL_%" OR a.action LIKE "VITALS_%")';
+    } else if (category === 'pharmacy') {
+      sqlWhere += ' AND (a.action LIKE "PRESCRIPTION_%" OR a.action LIKE "STOCK_%" OR a.action LIKE "MEDICINE_%")';
+    } else if (category === 'billing') {
+      sqlWhere += ' AND (a.action LIKE "INVOICE_%" OR a.action LIKE "PAYMENT_%" OR a.action LIKE "REFUND_%")';
+    } else if (category === 'system') {
+      sqlWhere += ' AND (a.action LIKE "SYSTEM_%" OR a.action LIKE "DATABASE_%" OR a.action LIKE "BACKUP_%" OR a.action LIKE "CLINIC_%")';
+    }
+  }
+
+  if (outcome && outcome !== 'all') {
+    sqlWhere += ' AND a.outcome = ?';
+    params.push(outcome);
+  }
+
+  if (userId && userId !== 'all') {
+    sqlWhere += ' AND a.user_id = ?';
+    params.push(userId);
+  }
+
+  if (search) {
+    sqlWhere += ' AND (a.user_email LIKE ? OR a.action LIKE ? OR a.details LIKE ? OR a.entity_id LIKE ? OR a.ip_address LIKE ? OR u.full_name LIKE ?)';
+    const term = `%${search}%`;
+    params.push(term, term, term, term, term, term);
+  }
+
+  const countRow = (db.prepare(`
+    SELECT COUNT(*) as total
+    FROM audit_events a
+    LEFT JOIN staff_users u ON u.id = a.user_id
+    ${sqlWhere}
+  `) as any).get(...params) as any;
+  const total = countRow?.total || 0;
+
+  const logs = (db.prepare(`
+    SELECT a.id, a.user_id, a.user_email, a.user_role, a.action, a.entity_type, a.entity_id, a.outcome, a.details, a.ip_address, a.created_at,
+           u.full_name as user_full_name, u.department as user_department
+    FROM audit_events a
+    LEFT JOIN staff_users u ON u.id = a.user_id
+    ${sqlWhere}
+    ORDER BY a.created_at DESC
+    LIMIT ? OFFSET ?
+  `) as any).all(...params, limit, offset);
+
+  // Security KPI metrics for administrative review
+  const failedLogins = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events WHERE action LIKE 'AUTH_%FAILED%' OR action LIKE '%BLOCKED%' OR action LIKE '%DEACTIVATED%'`) as any).get() as any)?.c || 0;
+  const loginEvents = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events WHERE action LIKE 'AUTH_LOGIN%'`) as any).get() as any)?.c || 0;
+  const deniedAttempts = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events WHERE outcome = 'DENIED'`) as any).get() as any)?.c || 0;
+  const passwordEvents = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events WHERE action LIKE '%PASSWORD%' OR action LIKE '%CREDENTIAL%'`) as any).get() as any)?.c || 0;
+  const dataModifications = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events WHERE action LIKE '%UPDATED%' OR action LIKE '%MODIFIED%' OR action LIKE '%AMENDED%' OR action LIKE '%MERGED%' OR action LIKE '%ADJUSTMENT%' OR action LIKE '%REFUND%'`) as any).get() as any)?.c || 0;
+  const allEventsCount = ((db.prepare(`SELECT COUNT(*) as c FROM audit_events`) as any).get() as any)?.c || 0;
+
+  res.json({
+    logs,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    },
+    summary: {
+      total: allEventsCount,
+      loginEvents,
+      failedLogins,
+      deniedAttempts,
+      passwordEvents,
+      dataModifications
+    }
+  });
+});
+
 export default router;

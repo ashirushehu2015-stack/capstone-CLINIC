@@ -447,10 +447,10 @@ function seedInitialData() {
   const settingsCount = db.prepare('SELECT COUNT(*) as c FROM clinic_settings').get() as { c: number };
   if (settingsCount.c === 0) {
     const defaultSettings: [string, string][] = [
-      ['clinic_name', 'CAPSTONE CLINIC SYSTEM'],
+      ['clinic_name', 'AL-EMAN CLINIC AND MATERNITY HOME'],
       ['clinic_phone', '+234 803 123 4567'],
-      ['clinic_email', 'ops@medipulseclinic.ng'],
-      ['clinic_address', '14 Victoria Island Boulevard, Lagos, Nigeria'],
+      ['clinic_email', 'info@alemanclinic.ng'],
+      ['clinic_address', 'NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE'],
       ['currency_code', 'NGN'],
       ['currency_symbol', '₦'],
       ['timezone', 'Africa/Lagos'],
@@ -463,7 +463,8 @@ function seedInitialData() {
       ins.run(k, v, now);
     }
   } else {
-    db.prepare("UPDATE clinic_settings SET value = 'CAPSTONE CLINIC SYSTEM' WHERE key = 'clinic_name'").run();
+    db.prepare("UPDATE clinic_settings SET value = 'AL-EMAN CLINIC AND MATERNITY HOME' WHERE key = 'clinic_name'").run();
+    db.prepare("UPDATE clinic_settings SET value = 'NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE' WHERE key = 'clinic_address'").run();
   }
 
   // 2. Initial Staff Users (Real credentials hashed with bcrypt)

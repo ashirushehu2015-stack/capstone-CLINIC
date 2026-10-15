@@ -328,4 +328,6 @@ export interface AuditEvent {
   details?: string;
   ip_address?: string;
   created_at: string;
+  user_full_name?: string;
+  user_department?: string;
 }

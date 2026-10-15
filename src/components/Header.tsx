@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StaffUser } from '../types';
 import { LogOut, Bell, Shield, User, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { apiRequest } from '../lib/api';
+import { ClinicLogo } from './ClinicLogo';
 
 interface HeaderProps {
   user: StaffUser;
@@ -43,19 +44,11 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onSwitchUser }) 
         
         {/* Brand & Shift Info */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold shadow-sm">
-            <span className="text-xl">✚</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-slate-900 tracking-tight">CAPSTONE CLINIC SYSTEM</span>
-              <span className="text-xs px-2 py-0.5 rounded border font-medium text-slate-600 bg-slate-50 border-slate-200">
-                Staff Only
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Shift Active · Secure Relational HMS
-            </p>
+          <ClinicLogo variant="compact" />
+          <div className="hidden md:flex items-center gap-2 pl-3 border-l border-slate-200">
+            <span className="text-xs px-2 py-0.5 rounded border font-semibold text-[#0047AB] bg-blue-50 border-blue-200">
+              Staff Portal Active
+            </span>
           </div>
         </div>
 

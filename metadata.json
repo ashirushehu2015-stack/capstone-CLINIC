@@ -1,5 +1,5 @@
 {
-  "name": "MediPulse Staff Clinic Management System",
+  "name": "CAPSTONE CLINIC SYSTEM",
   "description": "Enterprise-grade staff-only clinic management system featuring secure role-based access, patient registry, nursing triage, consultation EMR, pharmacy inventory, lab requests, and cashier billing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
