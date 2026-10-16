@@ -311,7 +311,7 @@ async function buildThesisDocxBuffer(chapterNumber?: number) {
     }
   };
 
-  if (isUpToChapterTwo) {
+  if (isComplete) {
     // 1. Cover / Title Page
     docChildren.push(
       new Paragraph({

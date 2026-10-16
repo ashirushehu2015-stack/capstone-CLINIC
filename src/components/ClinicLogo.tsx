@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ClinicLogoProps {
-  variant?: 'hero' | 'half-page' | 'compact' | 'icon-only';
+  variant?: 'hero' | 'half-page' | 'compact' | 'icon-only' | 'single-page';
   className?: string;
   showTagline?: boolean;
 }
@@ -155,11 +155,19 @@ export const ClinicLogo: React.FC<ClinicLogoProps> = ({
     );
   }
 
-  // 3. Variant: 'half-page' or 'hero' — The Full Centerpiece for the Landing Page
+  // 3. Variant: 'half-page', 'single-page' or 'hero' — Emblem Showcase
+  const isSinglePage = variant === 'single-page';
+
   return (
     <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
       {/* Outer Emblem Container */}
-      <div className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[440px] lg:h-[440px] flex items-center justify-center">
+      <div
+        className={`relative flex items-center justify-center shrink-0 ${
+          isSinglePage
+            ? 'w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-48 lg:h-48 xl:w-56 xl:h-56'
+            : 'w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[440px] lg:h-[440px]'
+        }`}
+      >
         
         {/* Ambient Royal Blue & Golden Glow (Harmonized with exact brand colors) */}
         <div className="absolute inset-0 bg-[#0047AB]/25 rounded-full blur-3xl transform scale-110 pointer-events-none" />
@@ -523,21 +531,37 @@ export const ClinicLogo: React.FC<ClinicLogoProps> = ({
       </div>
 
       {/* Typography & Official Name & Address with Exact Brand Colors */}
-      <div className="mt-6 text-center max-w-md px-4">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white font-sans drop-shadow-md leading-tight">
+      <div className={`${isSinglePage ? 'mt-2.5 max-w-sm px-2' : 'mt-6 max-w-md px-4'} text-center`}>
+        <h1
+          className={`${
+            isSinglePage
+              ? 'text-lg sm:text-xl lg:text-2xl'
+              : 'text-2xl sm:text-3xl lg:text-4xl'
+          } font-black tracking-tight text-white font-sans drop-shadow-md leading-tight`}
+        >
           AL-EMAN <span className="text-[#FFC72C] drop-shadow-sm">CLINIC &amp; MATERNITY HOME</span>
         </h1>
         
         {/* Physical Address Banner */}
-        <div className="mt-3 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#003380]/90 border border-[#FFC72C]/40 text-[#FFC72C] shadow-md shadow-blue-950/50">
-          <span className="w-2 h-2 rounded-full bg-[#FFC72C] shrink-0 animate-pulse" />
-          <span className="text-xs sm:text-sm font-bold tracking-wide uppercase font-mono text-white">
+        <div
+          className={`${
+            isSinglePage ? 'mt-1.5 px-3 py-1 text-[10px] sm:text-xs' : 'mt-3 px-3.5 py-1.5 text-xs sm:text-sm'
+          } inline-flex items-center gap-2 rounded-full bg-[#003380]/90 border border-[#FFC72C]/40 text-[#FFC72C] shadow-md shadow-blue-950/50`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FFC72C] shrink-0 animate-pulse" />
+          <span className="font-bold tracking-wide uppercase font-mono text-white">
             NO. 19 GULMA ROAD, ARGUNGU, KEBBI STATE
           </span>
         </div>
 
         {showTagline && (
-          <p className="mt-3 text-xs sm:text-[13px] text-blue-100/90 leading-relaxed font-sans max-w-sm mx-auto">
+          <p
+            className={`${
+              isSinglePage
+                ? 'mt-1.5 text-[11px] sm:text-xs leading-snug max-w-xs'
+                : 'mt-3 text-xs sm:text-[13px] leading-relaxed max-w-sm'
+            } text-blue-100/90 font-sans mx-auto`}
+          >
             Dedicated Maternal &amp; Neonatal Care, Inpatient Delivery, Outpatient Clinical Consultations,
             Diagnostic Pathology &amp; Secure Health Records.
           </p>
