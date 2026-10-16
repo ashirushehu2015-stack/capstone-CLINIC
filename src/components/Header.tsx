@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StaffUser } from '../types';
-import { LogOut, Bell, Shield, User, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { LogOut, Bell, Shield, User, RefreshCw, CheckCircle2, AlertTriangle, FileText, Download } from 'lucide-react';
 import { apiRequest } from '../lib/api';
 import { ClinicLogo } from './ClinicLogo';
 
@@ -8,9 +8,10 @@ interface HeaderProps {
   user: StaffUser;
   onLogout: () => void;
   onSwitchUser: (username: string) => void;
+  onOpenChapterOne?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ user, onLogout, onSwitchUser }) => {
+export const Header: React.FC<HeaderProps> = ({ user, onLogout, onSwitchUser, onOpenChapterOne }) => {
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
 
@@ -53,8 +54,21 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout, onSwitchUser }) 
         </div>
 
         {/* Right Action Cluster */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           
+          {/* Capstone Academic Thesis Viewer & Word (.docx) Download */}
+          {onOpenChapterOne && (
+            <button
+              onClick={onOpenChapterOne}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#0047AB] bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-all shadow-2xs cursor-pointer"
+              title="Open full Capstone Thesis (Chapters 1–5, Diagrams, References & Appendices) and download Microsoft Word document (.docx)"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#0047AB]" />
+              <span className="hidden sm:inline">Thesis (Chapters 1–5 Docx)</span>
+              <span className="sm:hidden">Thesis</span>
+            </button>
+          )}
+
           {/* Quick Role Switcher (Crucial for testing all distinct roles in real clinic workflow) */}
           <button
             onClick={() => setShowSwitchModal(true)}

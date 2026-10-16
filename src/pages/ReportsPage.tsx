@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StaffUser } from '../types';
 import { apiRequest, formatNGN, formatDate } from '../lib/api';
+import { ChapterOneModal } from '../components/ChapterOneModal';
+import { downloadThesisDocument } from '../lib/capstoneDocxGenerator';
 import {
   BarChart3,
   TrendingUp,
@@ -9,7 +11,9 @@ import {
   Layers,
   PieChart,
   DollarSign,
-  Activity
+  Activity,
+  FileText,
+  GraduationCap
 } from 'lucide-react';
 
 interface ReportsPageProps {
@@ -19,6 +23,7 @@ interface ReportsPageProps {
 export const ReportsPage: React.FC<ReportsPageProps> = ({ user }) => {
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showChapterOne, setShowChapterOne] = useState(false);
 
   useEffect(() => {
     async function loadAnalytics() {
@@ -76,6 +81,50 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ user }) => {
           <Download className="w-3.5 h-3.5" />
           <span>Export Analytics CSV</span>
         </button>
+      </div>
+
+      {/* Capstone Project Academic Documentation Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-[#0047AB] to-blue-900 text-white rounded-xl p-5 shadow-sm border border-blue-950 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#FFC72C] text-slate-950">
+              MIT Capstone Report (MIT 800)
+            </span>
+            <span className="text-xs text-blue-200">
+              Iconic University, Sokoto · Group 5 · Up to Chapter 2
+            </span>
+          </div>
+          <h2 className="text-base font-bold text-white tracking-tight">
+            Academic Project Report: SentinelFlow — ZITDA Case Study (Chapters 1 & 2)
+          </h2>
+          <p className="text-xs text-blue-100 max-w-2xl leading-relaxed">
+            Full academic documentation: Title Page, Declaration, Certification, Dedication, Acknowledgements, Abstract, Abbreviations, Chapter 1 (Introduction — Background, ZITDA Host Org, Problem Statement, Objectives, Scope, Terms) and Chapter 2 (Literature Review — NSM, IDPS Taxonomy, DPI, Existing Tools Table, Regulatory Frameworks, Gap Analysis). Remaining chapters scheduled to be supplied.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 flex-shrink-0 flex-wrap">
+          <button
+            onClick={() => setShowChapterOne(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5 text-blue-200" />
+            <span>Read Chapters 1 & 2</span>
+          </button>
+
+          <button
+            onClick={async () => {
+              try {
+                await downloadThesisDocument(undefined);
+              } catch (err) {
+                console.error('Download error:', err);
+              }
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-950 bg-[#FFC72C] hover:bg-amber-400 rounded-lg shadow-sm transition-all cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-950" />
+            <span>Download Report Up to Ch. 2 (.docx)</span>
+          </button>
+        </div>
       </div>
 
       {/* Top Diagnoses / Morbidity Surveillance */}
@@ -177,6 +226,12 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ user }) => {
           </div>
         </div>
       )}
+
+      {/* Academic Chapter One Modal */}
+      <ChapterOneModal
+        isOpen={showChapterOne}
+        onClose={() => setShowChapterOne(false)}
+      />
 
     </div>
   );

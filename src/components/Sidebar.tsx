@@ -11,7 +11,8 @@ import {
   Receipt,
   BarChart3,
   UserCog,
-  Database
+  Database,
+  GraduationCap
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -87,6 +88,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, role 
       label: 'Reports & Analytics',
       icon: BarChart3,
       roles: ['manager', 'accountant', 'admin']
+    },
+    {
+      id: 'chapter1',
+      label: 'Capstone Thesis (Ch. 1–5)',
+      icon: GraduationCap,
+      roles: allRoles
     },
     {
       id: 'staff',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StaffUser } from '../types';
 import { apiRequest } from '../lib/api';
 import { ClinicLogo } from '../components/ClinicLogo';
+import { ChapterOneModal } from '../components/ChapterOneModal';
 import {
   ShieldCheck,
   Lock,
@@ -25,7 +26,10 @@ import {
   MapPin,
   Calendar,
   Heart,
-  FileCheck
+  FileCheck,
+  FileText,
+  Download,
+  GraduationCap
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -33,6 +37,7 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+  const [showChapterOne, setShowChapterOne] = useState(false);
   const [identifier, setIdentifier] = useState('admin');
   const [password, setPassword] = useState('ClinicPass@2026');
   const [mfaCode, setMfaCode] = useState('');
@@ -244,6 +249,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-3 text-blue-200 text-[11px]">
+              <button
+                onClick={() => setShowChapterOne(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#FFC72C] hover:bg-amber-400 text-slate-950 font-bold text-[11px] shadow-sm transition-all cursor-pointer"
+                title="View and download complete MIT Capstone Thesis (Chapters 1–5, Diagrams & Appendices) as Microsoft Word docx"
+              >
+                <FileText className="w-3.5 h-3.5 text-slate-950" />
+                <span>Capstone Thesis (Chapters 1–5 Docx)</span>
+              </button>
               <span className="text-[#FFC72C] font-semibold tracking-wide">
                 Copyright @ MIT Capstone Project
               </span>
@@ -738,11 +751,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
           </div>
 
-          {/* Quick Back to Top / Login button */}
-          <div>
+          {/* Quick Actions: Chapter 1 & Back to Top */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setShowChapterOne(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0047AB] hover:bg-blue-800 text-amber-300 border border-blue-600 text-xs font-semibold shadow transition-all cursor-pointer"
+              title="View and download complete MIT Capstone Thesis (Chapters 1–5, Diagrams & Appendices) as Microsoft Word docx"
+            >
+              <FileText className="w-3.5 h-3.5 text-amber-300" />
+              <span>Capstone Thesis (Chapters 1–5 Docx)</span>
+            </button>
+
             <button
               onClick={() => scrollToSection('top-portal')}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0047AB] hover:bg-[#00398A] text-white text-xs font-semibold shadow transition-all cursor-pointer hover:scale-105"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold shadow transition-all cursor-pointer hover:scale-105"
             >
               <span>Back to Staff Sign-In</span>
               <ArrowUp className="w-3.5 h-3.5" />
@@ -751,6 +773,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         </div>
       </footer>
+
+      {/* Chapter One Academic Modal Viewer & Word (.docx) Downloader */}
+      <ChapterOneModal
+        isOpen={showChapterOne}
+        onClose={() => setShowChapterOne(false)}
+      />
 
     </div>
   );

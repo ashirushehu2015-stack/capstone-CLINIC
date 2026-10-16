@@ -15,6 +15,8 @@ import { BillingPage } from './pages/BillingPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { StaffPage } from './pages/StaffPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ChapterOnePage } from './pages/ChapterOnePage';
+import { ChapterOneModal } from './components/ChapterOneModal';
 import { Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
@@ -23,6 +25,7 @@ export default function App() {
   const [activeVisit, setActiveVisit] = useState<PatientVisit | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [showChapterOneModal, setShowChapterOneModal] = useState(false);
 
   // Forced first-time password change modal state
   const [showPwdModal, setShowPwdModal] = useState(false);
@@ -145,6 +148,7 @@ export default function App() {
         user={currentUser}
         onLogout={handleLogout}
         onSwitchUser={handleSwitchUser}
+        onOpenChapterOne={() => setShowChapterOneModal(true)}
       />
 
       <div className="flex-1 flex overflow-hidden">
@@ -225,6 +229,10 @@ export default function App() {
             <ReportsPage user={currentUser} />
           )}
 
+          {currentTab === 'chapter1' && (
+            <ChapterOnePage />
+          )}
+
           {currentTab === 'staff' && (
             <StaffPage currentUser={currentUser} />
           )}
@@ -234,6 +242,12 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Chapter One Academic Modal Viewer & Word (.docx) Downloader */}
+      <ChapterOneModal
+        isOpen={showChapterOneModal}
+        onClose={() => setShowChapterOneModal(false)}
+      />
 
       {/* Forced First-Time Password Change Modal */}
       {showPwdModal && (
