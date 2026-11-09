@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { StaffUser } from '../types';
 import { apiRequest } from '../lib/api';
 import { ClinicLogo } from '../components/ClinicLogo';
-import { ChapterOneModal } from '../components/ChapterOneModal';
 import { FacilityServicesModal } from '../components/FacilityServicesModal';
 import {
   ShieldCheck,
@@ -22,7 +21,6 @@ import {
   Stethoscope,
   MapPin,
   FileCheck,
-  FileText,
   Key
 } from 'lucide-react';
 
@@ -31,7 +29,6 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [showChapterOne, setShowChapterOne] = useState(false);
   const [showFacilityServices, setShowFacilityServices] = useState(false);
   const [identifier, setIdentifier] = useState('admin');
   const [password, setPassword] = useState('ClinicPass@2026');
@@ -193,17 +190,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <span>Services</span>
           </button>
 
-          {/* Academic Capstone Thesis Button */}
-          <button
-            onClick={() => setShowChapterOne(true)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FFC72C] hover:bg-amber-400 text-slate-950 font-bold text-[11px] shadow-sm transition-all cursor-pointer"
-            title="View and download complete MIT Capstone Thesis (Chapters 1–5, Diagrams & Appendices) as Microsoft Word docx"
-          >
-            <FileText className="w-3 h-3 text-slate-950" />
-            <span className="hidden md:inline">MIT</span>
-            <span>Thesis (Docx)</span>
-          </button>
-
           {/* Live Clock */}
           <div className="hidden lg:flex items-center gap-1 text-[11px] font-mono text-blue-300 pl-2 border-l border-blue-900/60">
             <Clock className="w-3 h-3 text-[#FFC72C]" />
@@ -281,7 +267,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           </div>
 
-          {/* Bottom Dispatch & Thesis Bar */}
+          {/* Bottom Dispatch & Facility Bar */}
           <div className="relative z-10 pt-2 border-t border-blue-800/50 flex flex-wrap items-center justify-between gap-2 text-[11px] text-blue-200/90 shrink-0">
             <div className="flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-[#FFC72C] shrink-0" />
@@ -512,12 +498,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <span>Argungu Municipal Facility</span>
         </div>
       </footer>
-
-      {/* Chapter One Academic Modal Viewer & Word (.docx) Downloader */}
-      <ChapterOneModal
-        isOpen={showChapterOne}
-        onClose={() => setShowChapterOne(false)}
-      />
 
       {/* Facility Services & Directory Modal */}
       <FacilityServicesModal
